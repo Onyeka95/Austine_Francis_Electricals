@@ -108,7 +108,7 @@ export default function Footer() {
 
       <div className="border-t border-white/10 py-5 text-center text-xs">
         <Container>
-          &copy; 2026 {siteConfig.businessName}. All rights
+          &copy; {new Date().getFullYear()} {siteConfig.businessName}. All rights
           reserved.
         </Container>
       </div>
