@@ -1,26 +1,74 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* Brand colours and fonts. Tailwind v4 reads these and creates classes such as
+   bg-brand-navy, text-brand-amber, font-heading. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-brand-navy: #0b1f3a;
+  --color-brand-navy-dark: #071428;
+  --color-brand-navy-light: #1c3557;
+  --color-brand-amber: #f5b301;
+  --color-brand-amber-dark: #d99a00;
+  --color-brand-light: #f4f6f8;
+  --color-brand-ink: #1f2937;
+  --color-brand-muted: #5b6676;
+
+  --font-heading: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--color-brand-ink);
+    background-color: #ffffff;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+  }
+
+  /* Visible keyboard focus: amber ring plus a thin navy ring so it shows on
+     both light and dark backgrounds. */
+  :focus-visible {
+    outline: 3px solid var(--color-brand-amber);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--color-brand-navy);
   }
 }
+/* ---------- Quotation printing (Phase 7) ---------- */
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* A4 paper with a 12mm margin on every side. */
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+  }
+
+  /* Makes browsers print background colours (the navy table header, the amber total). */
+  .print-exact {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Repeat the table header on every page, and never split a row across two pages. */
+  .print-table thead {
+    display: table-header-group;
+  }
+
+  .print-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }
