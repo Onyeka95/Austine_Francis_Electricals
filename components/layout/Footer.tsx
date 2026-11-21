@@ -6,6 +6,7 @@ import SocialIcon, { socialLabels } from "@/components/ui/SocialIcon";
 import LeadForm from "@/components/forms/LeadForm";
 import { navLinks, siteConfig } from "@/data/siteConfig";
 import { fullAddress, mailLink, telLink } from "@/lib/contactLinks";
+import CurrentYear from "@/components/layout/CurrentYear";
 import { SOCIAL_PLATFORMS } from "@/types";
 
 export default function Footer() {
@@ -108,7 +109,7 @@ export default function Footer() {
 
       <div className="border-t border-white/10 py-5 text-center text-xs">
         <Container>
-          &copy; {new Date().getFullYear()} {siteConfig.businessName}. All rights
+          &copy; <CurrentYear /> {siteConfig.businessName}. All rights
           reserved.
         </Container>
       </div>

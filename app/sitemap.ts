@@ -20,7 +20,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const pageEntries = pages.map(
     (path): MetadataRoute.Sitemap[number] => ({
       url: `${baseUrl}${path}`,
-      lastModified: new Date(),
       changeFrequency: path === "" ? "weekly" : "monthly",
       priority: path === "" ? 1 : 0.7,
     })
@@ -29,7 +28,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const postEntries = getAllPosts().map(
     (post): MetadataRoute.Sitemap[number] => ({
       url: `${baseUrl}/blog/${post.slug}`,
-      lastModified: post.date ? new Date(post.date) : new Date(),
+      // The post's own date, for example "2026-11-10". No date means no lastModified.
+      lastModified: post.date ? new Date(post.date) : undefined,
       changeFrequency: "yearly",
       priority: 0.6,
     })

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import SocialLinks from "@/components/contact/SocialLinks";
-import QuoteForm from "@/components/forms/QuoteForm";
-import { services } from "@/data/services";
+import { Suspense } from "react";
+import QuoteFormWithPrefill from "@/components/forms/QuoteFormWithPrefill";
+// import { services } from "@/data/services";
 import { siteConfig } from "@/data/siteConfig";
 import { fullAddress, mailLink, telLink } from "@/lib/contactLinks";
 import { whatsappLink } from "@/lib/whatsappLink";
@@ -17,11 +18,11 @@ interface ContactPageProps {
   searchParams: Promise<{ service?: string | string[] }>;
 }
 
-export default async function ContactPage({ searchParams }: ContactPageProps) {
+export default function ContactPage({ searchParams }: ContactPageProps) {
   // /contact?service=lighting-installation pre-selects that service (SV-1).
-  const { service } = await searchParams;
-  const requested = Array.isArray(service) ? service[0] : service;
-  const initialService = services.find((item) => item.id === requested)?.id ?? "";
+  // const { service } = await searchParams;
+  // const requested = Array.isArray(service) ? service[0] : service;
+  // const initialService = services.find((item) => item.id === requested)?.id ?? "";
 
   const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     fullAddress()
@@ -50,7 +51,17 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
             <p className="mt-1 mb-6 text-brand-muted">
               Fields marked * are required.
             </p>
-            <QuoteForm initialService={initialService} />
+            <Suspense
+              fallback={
+                <div
+                  role="status"
+                  aria-label="Loading the quote form"
+                  className="h-96 animate-pulse rounded-2xl bg-brand-light"
+                />
+              }
+            >
+              <QuoteFormWithPrefill searchParams={searchParams} />
+            </Suspense>
           </div>
 
           {/* Contact details (CT-6, CT-7, CT-8) */}
