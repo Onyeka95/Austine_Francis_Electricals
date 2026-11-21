@@ -291,3 +291,41 @@ export interface QuotationTotals {
   vat: number;
   grandTotal: number;
 }
+/** How the visitor wants to be contacted (CT-1). */
+export const CONTACT_METHODS = ["Phone call", "WhatsApp", "Email"] as const;
+
+export type ContactMethod = (typeof CONTACT_METHODS)[number];
+
+/** What the quote form sends to /api/contact. */
+export interface QuoteRequestPayload {
+  fullName: string;
+  phone: string;
+  email: string;
+  service: string; // a service id from data/services.ts, or "other"
+  location: string;
+  message: string; // the project description
+  preferredContact: ContactMethod | ""; // "" means not chosen yet
+  budget: string; // optional
+  website: string; // spam trap: real people never fill this in
+}
+
+/** One error message per form field (the spam trap has none). */
+export type QuoteFormErrors = Partial<
+  Record<keyof Omit<QuoteRequestPayload, "website">, string>
+>;
+
+/** What /api/contact sends back. */
+export interface ApiResponse {
+  ok: boolean;
+  message?: string;
+  errors?: QuoteFormErrors;
+}
+/** What the footer lead form sends to /api/lead (LC-1). */
+export interface LeadPayload {
+  email: string;
+  phone: string; // optional, "" if not given
+  website: string; // spam trap: real people never fill this in
+}
+
+/** Error messages for the lead form. */
+export type LeadFormErrors = Pick<QuoteFormErrors, "email" | "phone">;

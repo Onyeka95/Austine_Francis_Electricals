@@ -7,7 +7,7 @@ import type { HomeContent } from "@/types";
 export const homeContent: HomeContent = {
   hero: {
     eyebrow: "Electrician in Onitsha, Anambra State",
-    headline: "Reliable Electrical Installation and Repairs",
+    headline: "Reliable Electrical Installation, Home Automation and Repairs",
     backgroundImage: "/images/hero/hero.jpg",
     backgroundAlt: "Electrician working on a wiring installation",
   },

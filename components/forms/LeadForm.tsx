@@ -1,139 +1,207 @@
-"use client"; // uses state and browser events
+"use client";
 
-import { useRef, useState, type FormEvent } from "react";
-import { Loader2 } from "lucide-react";
-import { siteConfig } from "@/data/siteConfig";
+import { useRef, useState } from "react";
+import type { FormEvent } from "react";
+import { validateLead } from "@/lib/validateLead";
+import type { ApiResponse, LeadFormErrors, LeadPayload } from "@/types";
 
-type Status = "idle" | "loading" | "success" | "error";
+type Status = "idle" | "submitting" | "success" | "error";
 
-// Minimum gap between submissions (stops rapid duplicate clicks, LC-4)
-const COOLDOWN_MS = 10_000;
+interface LeadFormProps {
+  /** "dark" for a navy footer (default), "light" for a white background. */
+  tone?: "dark" | "light";
+}
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_PATTERN = /^[+\d\s()-]{7,20}$/;
-
-/** Footer sign-up form. Sends to /api/lead (the API route is built in Phase 9). */
-export default function LeadForm() {
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [website, setWebsite] = useState(""); // honeypot: real people never fill this
+export default function LeadForm({ tone = "dark" }: LeadFormProps) {
+  const [values, setValues] = useState<LeadPayload>({
+    email: "",
+    phone: "",
+    website: "",
+  });
+  const [errors, setErrors] = useState<LeadFormErrors>({});
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
-  const lastSubmitAt = useRef(0);
+
+  // Remembers the last email that signed up, so a double submit does nothing (LC-4).
+  const lastSignedUp = useRef("");
+
+  const isDark = tone === "dark";
+  const labelClass = `mb-1 block text-sm font-semibold ${
+    isDark ? "text-white" : "text-brand-ink"
+  }`;
+  const errorClass = `mt-1 text-sm font-medium ${
+    isDark ? "text-red-300" : "text-red-700"
+  }`;
+  // The inputs are white on both backgrounds, so they are always easy to read.
+  const inputClass = (hasError: boolean) =>
+    `w-full rounded-lg border bg-white px-3 py-2.5 text-base text-brand-ink placeholder:text-brand-muted ${
+      hasError ? "border-red-500" : "border-transparent"
+    }`;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (status === "loading") return;
+    if (status === "submitting") return;
 
-    // Client-side validation (the server validates again in Phase 9)
-    if (!EMAIL_PATTERN.test(email.trim())) {
-      setStatus("error");
-      setMessage("Please enter a valid email address.");
+    const found = validateLead(values);
+    setErrors(found);
+    if (found.email) {
+      document.getElementById("lead-email")?.focus();
       return;
     }
-    if (phone.trim() !== "" && !PHONE_PATTERN.test(phone.trim())) {
-      setStatus("error");
-      setMessage("Please enter a valid phone number, or leave it blank.");
+    if (found.phone) {
+      document.getElementById("lead-phone")?.focus();
       return;
     }
 
-    const now = Date.now();
-    if (now - lastSubmitAt.current < COOLDOWN_MS) {
-      setStatus("error");
-      setMessage("Please wait a few seconds before trying again.");
+    // Same email as a moment ago: no need to send again.
+    if (values.email.toLowerCase() === lastSignedUp.current) {
+      setMessage("You are already on our list. Thank you!");
+      setStatus("success");
       return;
     }
-    lastSubmitAt.current = now;
 
-    setStatus("loading");
+    setStatus("submitting");
     setMessage("");
 
     try {
       const response = await fetch("/api/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), phone: phone.trim(), website }),
+        body: JSON.stringify(values),
       });
-      if (!response.ok) throw new Error("Request failed");
+      const result = (await response.json()) as ApiResponse;
 
-      setStatus("success");
-      setMessage("Thank you! We will be in touch soon.");
-      setEmail("");
-      setPhone("");
-    } catch {
+      if (response.ok && result.ok) {
+        lastSignedUp.current = values.email.toLowerCase();
+        setValues({ email: "", phone: "", website: "" });
+        setMessage(result.message ?? "Thank you! You are on our list.");
+        setStatus("success");
+        return;
+      }
+
+      if (result.errors) setErrors(result.errors);
+      setMessage(result.message ?? "Something went wrong. Please try again.");
       setStatus("error");
-      setMessage(`Something went wrong. Please try again or call ${siteConfig.phone}.`);
+    } catch {
+      setMessage(
+        "We could not reach the server. Please check your internet connection and try again."
+      );
+      setStatus("error");
     }
   }
 
-  const inputClasses =
-    "w-full rounded-lg bg-white px-3 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted";
-
   return (
-    <form onSubmit={handleSubmit} noValidate className="relative space-y-3">
-      <div>
-        <label htmlFor="lead-email" className="sr-only">
-          Email address
-        </label>
-        <input
-          id="lead-email"
-          type="email"
-          autoComplete="email"
-          placeholder="Your email address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className={inputClasses}
-        />
+    <form onSubmit={handleSubmit} noValidate className="space-y-3">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label htmlFor="lead-email" className={labelClass}>
+            Email address
+          </label>
+          <input
+            id="lead-email"
+            type="email"
+            autoComplete="email"
+            maxLength={120}
+            value={values.email}
+            onChange={(event) => {
+              setValues({ ...values, email: event.target.value });
+              setErrors({ ...errors, email: undefined });
+            }}
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? "lead-email-error" : undefined}
+            className={inputClass(Boolean(errors.email))}
+          />
+          {errors.email && (
+            <p id="lead-email-error" role="alert" className={errorClass}>
+              {errors.email}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="lead-phone" className={labelClass}>
+            Phone <span className="font-normal opacity-80">(optional)</span>
+          </label>
+          <input
+            id="lead-phone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            maxLength={20}
+            value={values.phone}
+            onChange={(event) => {
+              setValues({ ...values, phone: event.target.value });
+              setErrors({ ...errors, phone: undefined });
+            }}
+            aria-invalid={Boolean(errors.phone)}
+            aria-describedby={errors.phone ? "lead-phone-error" : undefined}
+            className={inputClass(Boolean(errors.phone))}
+          />
+          {errors.phone && (
+            <p id="lead-phone-error" role="alert" className={errorClass}>
+              {errors.phone}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div>
-        <label htmlFor="lead-phone" className="sr-only">
-          Phone number (optional)
-        </label>
-        <input
-          id="lead-phone"
-          type="tel"
-          autoComplete="tel"
-          placeholder="Phone number (optional)"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className={inputClasses}
-        />
-      </div>
-
-      {/* Honeypot field: hidden from people, visible to bots */}
-      <div className="absolute -left-[9999px]" aria-hidden="true">
-        <label htmlFor="lead-website">Website</label>
+      {/* Spam trap: hidden from people, but bots fill it in. */}
+      <div
+        aria-hidden="true"
+        className="absolute -left-[9999px] h-0 w-0 overflow-hidden"
+      >
+        <label htmlFor="lead-website">Leave this field empty</label>
         <input
           id="lead-website"
+          name="company-website"
           type="text"
           tabIndex={-1}
           autoComplete="off"
-          value={website}
-          onChange={(e) => setWebsite(e.target.value)}
+          value={values.website}
+          onChange={(event) =>
+            setValues({ ...values, website: event.target.value })
+          }
         />
       </div>
 
       <button
         type="submit"
-        disabled={status === "loading"}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-amber px-5 py-2.5 text-sm font-semibold text-brand-navy transition-colors hover:bg-brand-amber-dark disabled:cursor-not-allowed disabled:opacity-70"
+        disabled={status === "submitting"}
+        className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-amber px-5 py-2.5 text-base font-bold text-brand-navy transition hover:bg-brand-amber-dark disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {status === "loading" && (
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+        {status === "submitting" ? (
+          <>
+            <span
+              className="h-4 w-4 animate-spin rounded-full border-2 border-brand-navy border-t-transparent"
+              aria-hidden="true"
+            />
+            Sending...
+          </>
+        ) : (
+          "Sign up"
         )}
-        {status === "loading" ? "Sending..." : "Keep me updated"}
       </button>
 
-      {/* aria-live announces the result to screen readers */}
-      <p
-        role="status"
-        aria-live="polite"
-        className={`min-h-5 text-sm ${
-          status === "success" ? "text-green-300" : "text-red-300"
-        }`}
-      >
-        {message}
+      {/* Result messages (LC-4) */}
+      {status === "success" && (
+        <p
+          role="status"
+          className={`text-sm font-semibold ${
+            isDark ? "text-brand-amber" : "text-brand-navy"
+          }`}
+        >
+          {message}
+        </p>
+      )}
+      {status === "error" && message && (
+        <p role="alert" className={errorClass}>
+          {message}
+        </p>
+      )}
+
+      <p className={`text-xs ${isDark ? "text-white/70" : "text-brand-muted"}`}>
+        We only use your details to send occasional offers and updates. You can
+        ask us to remove you at any time.
       </p>
     </form>
   );

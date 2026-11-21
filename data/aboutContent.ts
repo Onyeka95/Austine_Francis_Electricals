@@ -10,7 +10,7 @@ export const aboutContent: AboutContent = {
 
   // PLACEHOLDER: replace with his real story, in his own words if possible
   story: [
-    "Austine Francis Electricals is run by Iwuji C.A. Francis from No 60 Oguta Road, Onitsha. The business serves homeowners, landlords, shop owners and contractors with wiring, installations and repairs.",
+    "Austine Francis Electricals is run by Iwuji C.A. Francis. The business serves homeowners, landlords, shop owners and contractors with wiring, installations, home automation and repairs.",
     "Every job, from a single socket to a full building, is done with safety and neat workmanship in mind. Clients get a clear quotation, honest advice and work that is finished properly.",
     "The business also supplies quality electrical materials such as cables, breakers and fittings, so customers can buy what they need from the same trusted place.",
   ],
@@ -26,6 +26,7 @@ export const aboutContent: AboutContent = {
     "Distribution board and panel installation",
     "Lighting installation",
     "Fault finding and repairs",
+    "Home automation and smart home systems",
     "Generator changeover wiring",
     "Inverter and solar wiring",
     "Routine maintenance and inspection",

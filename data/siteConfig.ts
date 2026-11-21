@@ -5,20 +5,20 @@ import type { NavLink, SiteConfig } from "@/types";
  * Items marked PLACEHOLDER must be replaced before launch (see PRD section 17).
  */
 export const siteConfig: SiteConfig = {
-  businessName: "Austine Francis Electricals",
+  businessName: "AustineFrancis Electricals",
   ownerName: "Iwuji C.A. Francis",
   tagline: "Safe, reliable electrical work you can trust", // PLACEHOLDER
   description:
-    "Professional electrical wiring, installations, repairs and electrical materials in Onitsha and surrounding areas in Anambra State, Nigeria.",
+    "Professional electrical wiring, installations, repairs and Home Automation in Onitsha and Nation wide, Nigeria.",
 
   // From .env.local. The text after ?? is the fallback if the variable is missing.
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
 
-  phone: "08149589933",
-  phoneInternational: "+2348149589933",
-  whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "2348149589933",
+  phone: "08149589938",
+  phoneInternational: "+2348149589938",
+  whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "2348149589938",
   whatsappGreeting:
-    "Hello Austine Francis Electricals, I would like to make an enquiry.",
+    "Hello AustineFrancis Electricals, I would like to make an enquiry.",
   email: "iwujiebuka519@gmail.com",
 
   address: {
@@ -43,12 +43,12 @@ export const siteConfig: SiteConfig = {
   },
 
   // Confirm other towns he serves later
-  serviceAreas: ["Onitsha", "Surrounding areas in Anambra State"],
+  serviceAreas: ["Onitsha", "Surrounding areas in Anambra State and Nigeria"],
 
   // Leave empty to hide an icon. Paste the full profile URL to show it.
   social: {
-    facebook: "",
-    instagram: "",
+    facebook: "https://web.facebook.com/onyeka.iwuji",
+    instagram: "https://www.instagram.com/akeyno_innocent/",
     tiktok: "",
     x: "",
     youtube: "",
@@ -56,7 +56,7 @@ export const siteConfig: SiteConfig = {
   },
 
   // PLACEHOLDER: Google Maps embed URL for No 60 Oguta Road, Onitsha
-  mapEmbedUrl: "",
+  mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.903758120468!2d6.788462173862284!3d6.143628227463609!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1043930798f9672d%3A0xf09f7d808b5103a7!2sMammy%20Market%2C%2060%20Oguta%20Rd%2C%20City%20Centre%2C%20Isiokwe%20434106%2C%20Anambra!5e0!3m2!1sen!2sng!4v1795183272766!5m2!1sen!2sng",
 
   quotation: {
     prefix: "QT",

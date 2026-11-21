@@ -98,7 +98,7 @@ export default function Footer() {
 
         {/* Lead capture (GL-2) */}
         <div>
-          <h2 className="text-base font-semibold text-white">Stay in Touch</h2>
+          <h2 className="text-base font-semibold text-white">Get updates and offers</h2>
           <p className="mb-4 mt-4 text-sm">
             Leave your details and we will send you updates and offers.
           </p>
